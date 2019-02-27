@@ -1,0 +1,68 @@
+#! /usr/bin/env python
+# -*- coding:utf-8 -*-
+
+import numpy as np
+import pickle
+
+
+class NearestNeighbor(object):
+    def __init__(self):
+        pass
+
+    def train(self, X, y):
+        """ X is N x D where each row is an example. Y is 1-dimension of size N """
+        # the nearest neighbor  classifier simple remember all the training data
+        self.Xtr = X
+        self.ytr = y
+
+    def predict(self, X):
+        num_test = X.shape[0]
+        # let's make sure the output type matches the input type
+        Ypred = np.zeros(num_test, dtype=self.ytr.dtype)
+        for i in range(num_test):
+            print("Time:", i)
+            distances = np.sum(np.abs(self.Xtr - X[i, :]), axis=1)
+            min_index = np.argmin(distances)
+            Ypred[i] = self.ytr[min_index]
+        return Ypred
+
+
+if __name__ == '__main__':
+    def load_file(filename):
+        with open(filename, 'rb') as f:
+            data = pickle.load(f, encoding='latin1')
+        return data
+
+
+    def save_file(filename, data):
+        with open(filename, 'w+') as f:
+            pickle.dump(f, filename, data)
+
+
+    test = load_file(r'../cifar-10-batches-py/test_batch')
+    data1 = load_file(r'../cifar-10-batches-py/data_batch_1')
+    data2 = load_file(r'../cifar-10-batches-py/data_batch_2')
+    data3 = load_file(r'../cifar-10-batches-py/data_batch_3')
+    data4 = load_file(r'../cifar-10-batches-py/data_batch_4')
+    data5 = load_file(r'../cifar-10-batches-py/data_batch_5')
+
+    Xtr = np.zeros((50000, 3072))
+    ytr = np.zeros(50000)
+    Xte = test['data']
+    yte = test['labels']
+    Xtr[0:10000, :] = data1['data']
+    Xtr[10000:20000, :] = data2['data']
+    Xtr[20000:30000, :] = data3['data']
+    Xtr[30000:40000, :] = data4['data']
+    Xtr[40000:50000, :] = data5['data']
+
+    ytr[0:10000] = data1['labels']
+    ytr[10000:20000] = data2['labels']
+    ytr[20000:30000] = data3['labels']
+    ytr[30000:40000] = data4['labels']
+    ytr[40000:50000] = data5['labels']
+
+    model = NearestNeighbor()
+    model.train(Xtr, ytr)
+    Y = model.predict(Xte)
+    print(np.mean(Y == yte))
